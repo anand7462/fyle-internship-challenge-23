@@ -1,5 +1,74 @@
-<div class="grid h-screen place-items-center">
-  <div class="font-bold text-3xl">
-    Fyle Internship Challenge
+<div class="min-h-screen flex flex-col justify-center items-center bg-gray-200">
+  <div class="max-w-screen-md mx-auto px-6 py-8 bg-white rounded-lg shadow-lg" style="background-color: #f2f2f2;">
+    <!-- Search Bar -->
+    <div class="mb-8">
+      <h1 class="text-4xl font-bold text-gray-800 mb-4 text-center">GitHub Repository Viewer</h1>
+      <p class="text-lg text-gray-600 mb-4 text-center">Enter a GitHub username.</p>
+      <div class="flex flex-col items-center md:flex-row md:justify-center">
+        <input type="text" [(ngModel)]="username"
+          class="border border-gray-300 rounded px-4 py-2 w-full md:w-80 mb-2 md:mb-0 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder="Enter GitHub Username" style="background-color: #ffffff;">
+        <button (click)="searchUser()"
+          class="bg-pink-500 hover:bg-pink-600 text-white font-bold ml-2 py-2 px-6 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Search</button>
+      </div>
+    </div>
+
+    <!-- Search Results or Empty State -->
+    <div *ngIf="userData || userNotFound" class="flex flex-col items-center w-full">
+      <div *ngIf="userData" class="mb-6 flex flex-col items-center">
+        <img [src]="userData.avatar_url" alt="Profile Picture" class="w-20 h-20 rounded-full mb-2">
+        <p class="font-bold text-lg text-gray-800">{{ userData.name }}</p>
+        <p class="text-gray-600">{{ userData.bio }}</p>
+        <p class="text-gray-600">Followers: {{ userData.followers }}, Following: {{ userData.following }}</p>
+      </div>
+
+      <div *ngIf="repositories.length > 0" class="w-full">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">Public Repositories for {{ username }}</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <ng-container *ngFor="let repo of repositories">
+            <div class="border border-gray-300 rounded-md p-4 bg-white">
+              <h3 class="text-lg font-bold text-gray-800">{{ repo.name }}</h3>
+              <p class="mb-2 text-gray-600">{{ repo.description | slice:0:50 }}</p>
+              <div *ngIf="repo.languages && repo.languages.length > 0">
+                <p class="flex flex-wrap items-center text-gray-600">
+                  <span>Languages:</span>
+                  <ng-container *ngFor="let languageLogo of getLanguageLogos(repo.languages)">
+                    <img [src]="languageLogo" alt="Language Logo" class="ml-2 mt-2 w-6 h-6">
+                  </ng-container>
+                </p>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+
+      <div *ngIf="repositories.length === 0 && !userNotFound" class="mt-4 text-center">
+        <p class="text-red-500">No public repositories found for {{ username }}.</p>
+      </div>
+
+      <div *ngIf="userNotFound" class="mt-4 text-center">
+        <p class="text-red-500">User '{{ username }}' not found.</p>
+      </div>
+
+      <!-- Pagination Controls -->
+      <div class="mt-2 mb-6 flex justify-center items-center w-full">
+        <button (click)="setPage(currentPage - 1)" [disabled]="currentPage === 1"
+          class="mr-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l focus:outline-none focus:ring focus:border-blue-500">
+          Previous
+        </button>
+        <ng-container *ngFor="let page of getPager()">
+          <button (click)="setPage(page)"
+            [class]="currentPage === page ? 'bg-pink-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring focus:border-blue-500' : 'bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded focus:outline-none focus:ring focus:border-blue-500'">{{
+            page }}</button>
+        </ng-container>
+        <button (click)="setPage(currentPage + 1)" [disabled]="currentPage === totalPages"
+          class="ml-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r focus:outline-none focus:ring focus:border-blue-500">
+          Next
+        </button>
+      </div>
+      <div *ngIf="errorMessage" class="mt-4 text-center text-red-500">
+        <p>{{ errorMessage }}</p>
+      </div>
+    </div>
   </div>
 </div>
