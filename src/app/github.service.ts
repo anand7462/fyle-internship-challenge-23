@@ -22,7 +22,9 @@ export class GithubService {
   private handleError(error: any) {
     console.error('Error occurred:', error);
     let errorMessage = 'An unknown error occurred!';
-    if (error.error instanceof ErrorEvent) {
+    if (error.status === 403 && error.headers.get('X-RateLimit-Remaining') === '0') {
+      errorMessage = 'GitHub API rate limit exceeded. Please wait and try again later.';
+    } else if (error.error instanceof ErrorEvent) {
       errorMessage = `Error: ${error.error.message}`;
     } else {
       errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
@@ -79,6 +81,12 @@ export class GithubService {
           })
         );
       }),
+      catchError(this.handleError)
+    );
+  }
+
+  getRateLimitStatus(): Observable<any> {
+    return this.http.get('https://api.github.com/rate_limit', { headers: this.getHeaders() }).pipe(
       catchError(this.handleError)
     );
   }
