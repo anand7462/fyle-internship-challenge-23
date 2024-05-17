@@ -58,10 +58,12 @@ export class AppComponent {
   }
 
   getLanguageLogos(languages: string[]): string[] {
-    return languages.map(language => this.getLanguageLogo(language));
+    return languages
+      .map(language => this.getLanguageLogo(language))
+      .filter((logo): logo is string => logo !== null); // Type guard to filter out null values
   }
 
-  private getLanguageLogo(language: string): string {
+  private getLanguageLogo(language: string): string | null {
     const logos: { [key: string]: string } = {
       JavaScript: 'https://cdn.jsdelivr.net/npm/simple-icons@v5/icons/javascript.svg',
       Python: 'https://cdn.jsdelivr.net/npm/simple-icons@v5/icons/python.svg',
@@ -77,7 +79,7 @@ export class AppComponent {
       Angular: 'https://cdn.jsdelivr.net/npm/simple-icons@v5/icons/angular.svg', // Added Angular logo
       // Add more languages and their corresponding logo URLs as needed
     };
-    return logos[language] || 'https://cdn.jsdelivr.net/npm/simple-icons@v5/icons/file-code.svg';
+    return logos[language] || null;
   }
 
   setPage(page: number) {
