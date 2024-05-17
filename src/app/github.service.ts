@@ -2,21 +2,18 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, forkJoin, throwError } from 'rxjs';
 import { catchError, switchMap, map } from 'rxjs/operators';
-import { environment } from 'environment'; // Adjust the import based on your file structure
 
 @Injectable({
   providedIn: 'root'
 })
 export class GithubService {
   private apiUrl = 'https://api.github.com/users/';
-  private token = environment.githubToken;
 
   constructor(private http: HttpClient) {}
 
   private getHeaders(): HttpHeaders {
-    return new HttpHeaders({
-      'Authorization': `token ${this.token}`
-    });
+    // Remove the token logic
+    return new HttpHeaders();
   }
 
   private handleError(error: any) {
