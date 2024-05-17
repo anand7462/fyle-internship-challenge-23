@@ -1,26 +1,38 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, forkJoin, throwError } from 'rxjs';
-import { catchError, switchMap, map, mergeMap, toArray } from 'rxjs/operators';
+import { catchError, switchMap, map } from 'rxjs/operators';
+import { environment } from 'environment'; // Adjust the import based on your file structure
 
 @Injectable({
   providedIn: 'root'
 })
 export class GithubService {
   private apiUrl = 'https://api.github.com/users/';
+  private token = environment.githubToken;
 
   constructor(private http: HttpClient) {}
 
-  private handleError(message: string) {
-    return (error: any) => {
-      console.error(message, error);
-      return throwError(message); // Throw a custom error message
-    };
+  private getHeaders(): HttpHeaders {
+    return new HttpHeaders({
+      'Authorization': `token ${this.token}`
+    });
+  }
+
+  private handleError(error: any) {
+    console.error('Error occurred:', error);
+    let errorMessage = 'An unknown error occurred!';
+    if (error.error instanceof ErrorEvent) {
+      errorMessage = `Error: ${error.error.message}`;
+    } else {
+      errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
+    }
+    return throwError(errorMessage);
   }
 
   getUserData(username: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}${username}`).pipe(
-      catchError(this.handleError('Error fetching user data'))
+    return this.http.get(`${this.apiUrl}${username}`, { headers: this.getHeaders() }).pipe(
+      catchError(this.handleError)
     );
   }
 
@@ -29,15 +41,15 @@ export class GithubService {
     params = params.append('page', page.toString());
     params = params.append('per_page', perPage.toString());
 
-    return this.http.get<any[]>(`${this.apiUrl}${username}/repos`, { params: params }).pipe(
-      catchError(this.handleError('Error fetching repositories'))
+    return this.http.get<any[]>(`${this.apiUrl}${username}/repos`, { params: params, headers: this.getHeaders() }).pipe(
+      catchError(this.handleError)
     );
   }
 
   getRepoLanguages(repoUrl: string): Observable<string[]> {
-    return this.http.get<any>(repoUrl).pipe(
+    return this.http.get<any>(repoUrl, { headers: this.getHeaders() }).pipe(
       map(data => Object.keys(data)),
-      catchError(this.handleError('Error fetching repository languages'))
+      catchError(this.handleError)
     );
   }
 
@@ -67,7 +79,7 @@ export class GithubService {
           })
         );
       }),
-      catchError(this.handleError('Error fetching user data and repositories'))
+      catchError(this.handleError)
     );
   }
 }
