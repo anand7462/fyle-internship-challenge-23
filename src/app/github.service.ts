@@ -2,22 +2,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, forkJoin, throwError } from 'rxjs';
 import { catchError, switchMap, map } from 'rxjs/operators';
-import { environment } from '../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GithubService {
   private apiUrl = 'https://api.github.com/users/';
-  private accessToken = environment.githubAccessToken;
 
   constructor(private http: HttpClient) {}
-
-  private getHeaders(): HttpHeaders {
-    return new HttpHeaders({
-      'Authorization': `token ${this.accessToken}`
-    });
-  }
 
   private handleError(error: any) {
     console.error('Error occurred:', error);
@@ -33,7 +25,7 @@ export class GithubService {
   }
 
   getUserData(username: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}${username}`, { headers: this.getHeaders() }).pipe(
+    return this.http.get(`${this.apiUrl}${username}`).pipe(
       catchError(this.handleError)
     );
   }
@@ -43,13 +35,13 @@ export class GithubService {
     params = params.append('page', page.toString());
     params = params.append('per_page', perPage.toString());
 
-    return this.http.get<any[]>(`${this.apiUrl}${username}/repos`, { params: params, headers: this.getHeaders() }).pipe(
+    return this.http.get<any[]>(`${this.apiUrl}${username}/repos`, { params: params }).pipe(
       catchError(this.handleError)
     );
   }
 
   getRepoLanguages(repoUrl: string): Observable<string[]> {
-    return this.http.get<any>(repoUrl, { headers: this.getHeaders() }).pipe(
+    return this.http.get<any>(repoUrl).pipe(
       map(data => Object.keys(data)),
       catchError(this.handleError)
     );
@@ -86,7 +78,7 @@ export class GithubService {
   }
 
   getRateLimitStatus(): Observable<any> {
-    return this.http.get('https://api.github.com/rate_limit', { headers: this.getHeaders() }).pipe(
+    return this.http.get('https://api.github.com/rate_limit').pipe(
       catchError(this.handleError)
     );
   }

@@ -52,6 +52,8 @@ export class AppComponent {
       this.userData = null;
       this.repositories = [];
       this.errorMessage = `User '${this.username}' not found.`;
+    } else if (error.status === 401) {
+      this.errorMessage = 'Unauthorized: Invalid access token.';
     } else {
       this.errorMessage = 'Error fetching user data and repositories. Please try again later.';
     }
